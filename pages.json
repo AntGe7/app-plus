@@ -6,9 +6,15 @@
 				"navigationBarTitleText": "",
 				// #ifdef APP-PLUS
 				"app-plus": {
-				  "titleNView": false  // 禁用原生导航栏
+				  "titleNView": false  ,// 禁用原生导航栏
+				    "bounce": "none" // 在 App 上禁止页面弹性滑动
 				},
 				// #endif
+				 // #ifdef MP-WEIXIN
+				    "mp-weixin": {
+				      "navigationStyle": "custom" // 在微信小程序中使用自定义导航栏
+				    },
+				    // #endif
 				// #ifdef H5
 				"h5": {
 				  "titleNView": false  // 在 H5 上启用自定义的标题栏
