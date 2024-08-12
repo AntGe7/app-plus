@@ -1,4 +1,3 @@
-<!-- 蓝色登录页面2 -->
 <template>
 	<view style="height:100vh;background: #fff;">
 		<view class="img-a">
@@ -33,33 +32,42 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue';
-import uni from '@dcloudio/uni-app';
+import {useUserStore} from '@/stores/modules/userStore.js'
+// import uni from '@dcloudio/uni-app';
 
 const phone = ref('');  // 手机号码
 const pwd = ref('');    // 密码
-
-// 生命周期钩子 - 页面加载
-onMounted(() => {
-    console.log(uni.$uv.os());
-    console.log(uni.$uv.sys());
-    console.log(uni.$uv.trim(' abc '));  // 去除两端空格
-});
+const token = ref('');  //token
+// // 生命周期钩子 - 页面加载
+// onMounted(() => {
+//     console.log(uni.$uv.os());
+//     console.log(uni.$uv.sys());
+//     console.log(uni.$uv.trim(' abc '));  // 去除两端空格
+// });
 
 // 登录操作
-const login = () => {
-    if (!phone.value) {
-        uni.showToast({ title: '请输入您的手机号', icon: 'none' });
-        return;
-    }
-    if (!/^[1][3,4,5,7,8,9][0-9]{9}$/.test(phone.value)) {
-        uni.showToast({ title: '请输入正确手机号', icon: 'none' });
-        return;
-    }
-    if (!pwd.value) {
-        uni.showToast({ title: '请输入您的密码', icon: 'none' });
-        return;
-    }
-    uni.showToast({ title: '登录成功！', icon: 'none' });
+const login =async  () => {
+  let params = {
+    password: "YWRtaW4xMjM=",
+    username: "admin",
+    isPassword: 1,
+  };
+
+  try {
+    const  res = await uni.request({
+      url: '/sys/login', 
+      method: 'POST',
+      data: params
+    });
+	token.value = res.data.result.token
+	const userStore = useUserStore()
+	userStore.setToken(res.data.result.token)  // 保存 token
+	uni.redirectTo({
+  url: '/pages/index/index' // 确保路径是正确的
+});
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 // 注册页面跳转

@@ -31,6 +31,13 @@ if (uni.restoreGlobal) {
 }
 (function(vue) {
   "use strict";
+  function formatAppLog(type, filename, ...args) {
+    if (uni.__log__) {
+      uni.__log__(type, filename, ...args);
+    } else {
+      console[type].apply(console, [...args, filename]);
+    }
+  }
   const _export_sfc = (sfc, props) => {
     const target = sfc.__vccOpts || sfc;
     for (const [key, val] of props) {
@@ -39,129 +46,120 @@ if (uni.restoreGlobal) {
     return target;
   };
   const _sfc_main$2 = {
-    data() {
-      return {
-        phone: "",
-        //手机号码
-        pwd: ""
-        //密码
+    __name: "index",
+    setup(__props) {
+      const phone = vue.ref("");
+      const pwd = vue.ref("");
+      const login = async () => {
+        let params = {
+          password: "YWRtaW4xMjM=",
+          username: "admin",
+          isPassword: 1
+        };
+        try {
+          const response = await uni.request({
+            url: "/sys/login",
+            // 
+            method: "POST",
+            data: params
+          });
+          formatAppLog("log", "at pages/login/index.vue:62", response, "response");
+        } catch (error2) {
+          formatAppLog("error", "at pages/login/index.vue:64", error2);
+        }
       };
-    },
-    onLoad() {
-    },
-    methods: {
-      //当前登录按钮操作
-      login() {
-        var that = this;
-        if (!that.phone) {
-          uni.showToast({ title: "请输入您的手机号", icon: "none" });
-          return;
-        }
-        if (!/^[1][3,4,5,7,8,9][0-9]{9}$/.test(that.phone)) {
-          uni.showToast({ title: "请输入正确手机号", icon: "none" });
-          return;
-        }
-        if (!that.pwd) {
-          uni.showToast({ title: "请输入您的密码", icon: "none" });
-          return;
-        }
-        uni.showToast({ title: "登录成功！", icon: "none" });
-      },
-      //注册按钮点击
-      reg() {
+      const reg = () => {
         uni.showToast({ title: "注册跳转", icon: "none" });
-      },
-      //等三方微信登录
-      wxLogin() {
+      };
+      const wxLogin = () => {
         uni.showToast({ title: "微信登录", icon: "none" });
-      },
-      //第三方支付宝登录
-      zfbLogin() {
+      };
+      const zfbLogin = () => {
         uni.showToast({ title: "支付宝登录", icon: "none" });
-      }
-    }
-  };
-  function _sfc_render$1(_ctx, _cache, $props, $setup, $data, $options) {
-    return vue.openBlock(), vue.createElementBlock("view", { style: { "height": "100vh", "background": "#fff" } }, [
-      vue.createElementVNode("view", { class: "img-a" }, [
-        vue.createElementVNode("view", { class: "t-b" }, [
-          vue.createTextVNode(" 您好， "),
-          vue.createElementVNode("br"),
-          vue.createTextVNode(" 欢迎使用，XXX小程序 ")
-        ])
-      ]),
-      vue.createElementVNode("view", {
-        class: "login-view",
-        style: {}
-      }, [
-        vue.createElementVNode("view", { class: "t-login" }, [
-          vue.createElementVNode("form", { class: "cl" }, [
-            vue.createElementVNode("view", { class: "t-a" }, [
-              vue.createElementVNode("text", { class: "txt" }, "手机号"),
-              vue.withDirectives(vue.createElementVNode(
-                "input",
-                {
-                  type: "number",
-                  name: "phone",
-                  placeholder: "请输入您的手机号",
-                  maxlength: "11",
-                  "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => $data.phone = $event)
-                },
-                null,
-                512
-                /* NEED_PATCH */
-              ), [
-                [vue.vModelText, $data.phone]
-              ])
-            ]),
-            vue.createElementVNode("view", { class: "t-a" }, [
-              vue.createElementVNode("text", { class: "txt" }, "密码"),
-              vue.withDirectives(vue.createElementVNode(
-                "input",
-                {
-                  type: "password",
-                  name: "code",
-                  maxlength: "18",
-                  placeholder: "请输入您的密码",
-                  "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => $data.pwd = $event)
-                },
-                null,
-                512
-                /* NEED_PATCH */
-              ), [
-                [vue.vModelText, $data.pwd]
-              ])
-            ]),
-            vue.createElementVNode("button", {
-              onClick: _cache[2] || (_cache[2] = ($event) => $options.login())
-            }, "登 录"),
-            vue.createElementVNode("view", {
-              class: "reg",
-              onClick: _cache[3] || (_cache[3] = ($event) => $options.reg())
-            }, "注 册")
+      };
+      return (_ctx, _cache) => {
+        return vue.openBlock(), vue.createElementBlock("view", { style: { "height": "100vh", "background": "#fff" } }, [
+          vue.createElementVNode("view", { class: "img-a" }, [
+            vue.createElementVNode("view", { class: "t-b" }, [
+              vue.createTextVNode(" 您好， "),
+              vue.createElementVNode("br"),
+              vue.createTextVNode(" 欢迎使用，XXX小程序 ")
+            ])
           ]),
-          vue.createElementVNode("view", { class: "t-f" }, [
-            vue.createElementVNode("text", null, "—————— 第三方账号登录 ——————")
-          ]),
-          vue.createElementVNode("view", { class: "t-e cl" }, [
-            vue.createElementVNode("view", {
-              class: "t-g",
-              onClick: _cache[4] || (_cache[4] = ($event) => $options.wxLogin())
-            }, [
-              vue.createElementVNode("image", { src: "https://zhoukaiwen.com/img/loginImg/wx.png" })
-            ]),
-            vue.createElementVNode("view", {
-              class: "t-g",
-              onClick: _cache[5] || (_cache[5] = ($event) => $options.zfbLogin())
-            }, [
-              vue.createElementVNode("image", { src: "https://zhoukaiwen.com/img/loginImg/qq.png" })
+          vue.createElementVNode("view", {
+            class: "login-view",
+            style: {}
+          }, [
+            vue.createElementVNode("view", { class: "t-login" }, [
+              vue.createElementVNode("form", { class: "cl" }, [
+                vue.createElementVNode("view", { class: "t-a" }, [
+                  vue.createElementVNode("text", { class: "txt" }, "手机号"),
+                  vue.withDirectives(vue.createElementVNode(
+                    "input",
+                    {
+                      type: "number",
+                      name: "phone",
+                      placeholder: "请输入您的手机号",
+                      maxlength: "11",
+                      "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => phone.value = $event)
+                    },
+                    null,
+                    512
+                    /* NEED_PATCH */
+                  ), [
+                    [vue.vModelText, phone.value]
+                  ])
+                ]),
+                vue.createElementVNode("view", { class: "t-a" }, [
+                  vue.createElementVNode("text", { class: "txt" }, "密码"),
+                  vue.withDirectives(vue.createElementVNode(
+                    "input",
+                    {
+                      type: "password",
+                      name: "code",
+                      maxlength: "18",
+                      placeholder: "请输入您的密码",
+                      "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => pwd.value = $event)
+                    },
+                    null,
+                    512
+                    /* NEED_PATCH */
+                  ), [
+                    [vue.vModelText, pwd.value]
+                  ])
+                ]),
+                vue.createElementVNode("button", {
+                  onClick: _cache[2] || (_cache[2] = ($event) => login())
+                }, "登 录"),
+                vue.createElementVNode("view", {
+                  class: "reg",
+                  onClick: _cache[3] || (_cache[3] = ($event) => reg())
+                }, "注 册")
+              ]),
+              vue.createElementVNode("view", { class: "t-f" }, [
+                vue.createElementVNode("text", null, "—————— 第三方账号登录 ——————")
+              ]),
+              vue.createElementVNode("view", { class: "t-e cl" }, [
+                vue.createElementVNode("view", {
+                  class: "t-g",
+                  onClick: _cache[4] || (_cache[4] = ($event) => wxLogin())
+                }, [
+                  vue.createElementVNode("image", { src: "https://zhoukaiwen.com/img/loginImg/wx.png" })
+                ]),
+                vue.createElementVNode("view", {
+                  class: "t-g",
+                  onClick: _cache[5] || (_cache[5] = ($event) => zfbLogin())
+                }, [
+                  vue.createElementVNode("image", { src: "https://zhoukaiwen.com/img/loginImg/qq.png" })
+                ])
+              ])
             ])
           ])
-        ])
-      ])
-    ]);
-  }
-  const PagesLoginIndex = /* @__PURE__ */ _export_sfc(_sfc_main$2, [["render", _sfc_render$1], ["__file", "C:/Users/antge/Desktop/wlhy-yy-plus/wlhy-plus/wlhy-tyyy-plus/pages/login/index.vue"]]);
+        ]);
+      };
+    }
+  };
+  const PagesLoginIndex = /* @__PURE__ */ _export_sfc(_sfc_main$2, [["__file", "C:/Users/antge/Desktop/wlhy-yy-plus/wlhy-plus/wlhy-tyyy-plus/pages/login/index.vue"]]);
   const _imports_0 = "/static/logo.png";
   const _sfc_main$1 = {
     data() {
@@ -193,13 +191,6 @@ if (uni.restoreGlobal) {
   const PagesIndexIndex = /* @__PURE__ */ _export_sfc(_sfc_main$1, [["render", _sfc_render], ["__file", "C:/Users/antge/Desktop/wlhy-yy-plus/wlhy-plus/wlhy-tyyy-plus/pages/index/index.vue"]]);
   __definePage("pages/login/index", PagesLoginIndex);
   __definePage("pages/index/index", PagesIndexIndex);
-  function formatAppLog(type, filename, ...args) {
-    if (uni.__log__) {
-      uni.__log__(type, filename, ...args);
-    } else {
-      console[type].apply(console, [...args, filename]);
-    }
-  }
   const _sfc_main = {
     onLaunch: function() {
       formatAppLog("log", "at App.vue:4", "App Launch");
