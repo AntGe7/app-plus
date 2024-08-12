@@ -1,9 +1,25 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	"pages": [
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationBarTitleText": "",
+				// #ifdef APP-PLUS
+				"app-plus": {
+				  "titleNView": false  // 禁用原生导航栏
+				},
+				// #endif
+				// #ifdef H5
+				"h5": {
+				  "titleNView": false  // 在 H5 上启用自定义的标题栏
+				}
+				// #endif
+			}
+		},
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationBarTitleText": ""
 			}
 		}
 	],
