@@ -23,11 +23,15 @@
         </uv-tabs>
         <view class="login-form">
           <!-- 密码登录表单 -->
-          <view v-if="isPassword == 1">
-            <uv-form :model="form1" labelPosition="top" ref="form1" labelWidth="120">
+          <view v-show="isPassword == 1">
+            <uv-form
+              labelPosition="top"
+              ref="form1"
+              labelWidth="120"
+            >
               <uv-form-item label="账号" prop="username" borderBottom>
                 <uv-input
-                  v-model.trim="form1.username"
+                  v-model.trim="username"
                   type="text"
                   placeholder="请输入账号"
                   border="none"
@@ -36,7 +40,7 @@
               </uv-form-item>
               <uv-form-item label="密码" prop="password" borderBottom>
                 <uv-input
-                  v-model.trim="form1.password"
+                  v-model.trim="password"
                   :type="isPass"
                   placeholder="请输入密码"
                   border="none"
@@ -54,11 +58,15 @@
             </uv-form>
           </view>
           <!-- 验证码登录表单 -->
-          <view v-if="isPassword == 2">
-            <uv-form :model="form2" labelPosition="top" ref="form2" labelWidth="120">
+          <view v-show="isPassword == 2">
+            <uv-form
+              labelPosition="top"
+              ref="form2"
+              labelWidth="120"
+            >
               <uv-form-item label="手机号" prop="mobile" borderBottom>
                 <uv-input
-                  v-model="form2.mobile"
+                  v-model.trim="mobile"
                   type="number"
                   maxlength="11"
                   placeholder="请输入手机号"
@@ -68,7 +76,7 @@
               </uv-form-item>
               <uv-form-item label="验证码" prop="captcha" borderBottom>
                 <uv-input
-                  v-model="form2.captcha"
+                  v-model.trim="captcha"
                   type="number"
                   maxlength="6"
                   placeholder="请输入验证码"
@@ -113,7 +121,7 @@
 
 <script setup>
 import { ref, reactive } from "vue";
-import { login1, login2, sendCode } from '@/api/login/login.js';
+import { login1, login2, sendCode } from "@/api/login/login.js";
 
 // tabs显示
 const list = ref([
@@ -122,16 +130,10 @@ const list = ref([
 ]);
 
 // form表单 用户名登录
-const form1 = reactive({
-  username: "",
-  password: ""
-});
-
-// form表单 验证码登录
-const form2 = reactive({
-  mobile: "",
-  captcha: ""
-});
+const username = ref('');
+const password = ref('');
+const mobile = ref('');
+const captcha = ref('');
 
 // 处理密码显示与隐藏
 const eyeIcon = ref("eye-off");
@@ -153,11 +155,11 @@ const isPassword = ref(1);
 const clickTab = (index) => {
   isPassword.value = index.id;
   if (isPassword.value === 1) {
-    form1.username = "";
-    form1.password = "";
+    username.value = "";
+    password.value = "";
   } else if (isPassword.value === 2) {
-    form2.mobile = "";
-    form2.captcha = "";
+    mobile.value = "";
+    captcha.value = "";
   }
 };
 
@@ -180,7 +182,7 @@ const startCountdown = () => {
 // 手机号校验逻辑
 const validateMobile = (mobile) => {
   const mobileRegex = /^1\d{10}$/;
-  if (mobile === '') {
+  if (mobile === "") {
     uni.showToast({ title: "请输入手机号", icon: "none" });
     return false;
   }
@@ -193,36 +195,35 @@ const validateMobile = (mobile) => {
 
 // 定义点击获取验证码的方法
 const getCode = () => {
- try {
-  if (validateMobile(form2.mobile)) {
-    startCountdown();
-    let params = { mobile: form2.mobile, smsmode: '0', messageSource: '2' };
-    sendCode(params);
+  try {
+    if (validateMobile(mobile.value)) {
+      startCountdown();
+      let params = { mobile: mobile.value, smsmode: "0", messageSource: "2" };
+      console.log(params,'params');
+      sendCode(params);
+    }
+  } catch (error) {
+    //显示错误信息
+    uni.showToast({ title: error.message, icon: "none" });
   }
- } catch (error) {
-   //显示错误信息
-   uni.showToast({ title: error.message, icon: "none" });
- }
 };
 
 // 点击登录按钮 主要是验证必填和登录方式
 const onLogin = () => {
   if (isPassword.value === 1) {
-    if (form1.username === '') {
+    if (username.value === "") {
       return uni.showToast({ title: "请输入用户名", icon: "none" });
     }
-    if (form1.password === '') {
+    if (password.value === "") {
       return uni.showToast({ title: "请输入密码", icon: "none" });
     }
-    login1({ ...form1 });
   } else if (isPassword.value === 2) {
-    if (!validateMobile(form2.mobile)) {
+    if (!validateMobile(mobile.value)) {
       return;
     }
-    if (form2.captcha === '') {
+    if (captcha.value === "") {
       return uni.showToast({ title: "请输入验证码", icon: "none" });
     }
-    login2({ ...form2 });
   }
 };
 
