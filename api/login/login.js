@@ -24,7 +24,7 @@
 // }
 export const login1 = (data) => {
 	return uni.request({
-		url: '/user/login',
+		url: '/sys/login',
 		method: 'POST',
 		data
 	});

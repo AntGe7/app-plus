@@ -11,83 +11,39 @@
       <view class="t-login">
         <!-- 使用 uv-tabs 组件实现登录方式切换 -->
         <uv-tabs :list="list" @click="clickTab" lineWidth="80">
-          <div
-            v-for="(item, index) in list"
-            :key="index"
-            class="tab-item"
-            :class="{ active: isPassword === item.id }"
-            @click="clickTab(item.id)"
-          >
+          <div v-for="(item) in list" :key="item.id" class="tab-item" :class="{ active: isPassword === item.id }"
+            @click="clickTab(item.id)">
             {{ item.name }}
           </div>
         </uv-tabs>
         <view class="login-form">
           <!-- 密码登录表单 -->
-          <view v-show="isPassword == 1">
-            <uv-form
-              labelPosition="top"
-              ref="form1"
-              labelWidth="120"
-            >
+          <view v-if="isPassword == 1" id="form1" key="form1">
+            <uv-form labelPosition="top" ref="form1" labelWidth="120">
               <uv-form-item label="账号" prop="username" borderBottom>
-                <uv-input
-                  v-model.trim="username"
-                  type="text"
-                  placeholder="请输入账号"
-                  border="none"
-                >
+                <uv-input v-model.trim="username" type="text" placeholder="请输入账号" border="none">
                 </uv-input>
               </uv-form-item>
               <uv-form-item label="密码" prop="password" borderBottom>
-                <uv-input
-                  v-model.trim="password"
-                  :type="isPass"
-                  placeholder="请输入密码"
-                  border="none"
-                >
+                <uv-input v-model.trim="password" :type="isPass" placeholder="请输入密码" border="none">
                   <template v-slot:suffix>
-                    <uv-icon
-                      style="height: 30rpx"
-                      :name="eyeIcon"
-                      @click="isEye"
-                      size="22"
-                    ></uv-icon>
+                    <uv-icon style="height: 30rpx" :name="eyeIcon" @click="isEye" size="22"></uv-icon>
                   </template>
                 </uv-input>
               </uv-form-item>
             </uv-form>
           </view>
           <!-- 验证码登录表单 -->
-          <view v-show="isPassword == 2">
-            <uv-form
-              labelPosition="top"
-              ref="form2"
-              labelWidth="120"
-            >
+          <view v-else="isPassword == 2" id="form2" key="form2">
+            <uv-form labelPosition="top" ref="form2" labelWidth="120">
               <uv-form-item label="手机号" prop="mobile" borderBottom>
-                <uv-input
-                  v-model.trim="mobile"
-                  type="number"
-                  maxlength="11"
-                  placeholder="请输入手机号"
-                  border="none"
-                >
+                <uv-input v-model.trim="mobile" type="number" maxlength="11" placeholder="请输入手机号" border="none">
                 </uv-input>
               </uv-form-item>
               <uv-form-item label="验证码" prop="captcha" borderBottom>
-                <uv-input
-                  v-model.trim="captcha"
-                  type="number"
-                  maxlength="6"
-                  placeholder="请输入验证码"
-                  border="none"
-                >
+                <uv-input v-model.trim="captcha" type="number" maxlength="6" placeholder="请输入验证码" border="none">
                   <template v-slot:suffix>
-                    <view
-                      style="height: 30rpx"
-                      @tap="getCode"
-                      :disabled="countdownActive"
-                    >
+                    <view style="height: 30rpx" @tap="getCode" :disabled="countdownActive">
                       {{
                         countdown > 0
                           ? `${countdown}秒后重新获取`
@@ -120,9 +76,9 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref } from "vue";
 import { login1, login2, sendCode } from "@/api/login/login.js";
-
+import { useUserStore } from '@/stores/modules/userStore.js'
 // tabs显示
 const list = ref([
   { name: "密码登录", id: 1 },
@@ -194,13 +150,13 @@ const validateMobile = (mobile) => {
 };
 
 // 定义点击获取验证码的方法
-const getCode = () => {
+const getCode =async () => {
   try {
     if (validateMobile(mobile.value)) {
       startCountdown();
       let params = { mobile: mobile.value, smsmode: "0", messageSource: "2" };
-      console.log(params,'params');
-      sendCode(params);
+      console.log(params, 'params');
+   await sendCode(params);
     }
   } catch (error) {
     //显示错误信息
@@ -217,6 +173,10 @@ const onLogin = () => {
     if (password.value === "") {
       return uni.showToast({ title: "请输入密码", icon: "none" });
     }
+    // 进行 Base64 编码
+    const encodedPassword = btoa(password.value);
+    // 提交加密后的密码
+    getLogin1(username.value, encodedPassword);
   } else if (isPassword.value === 2) {
     if (!validateMobile(mobile.value)) {
       return;
@@ -224,9 +184,31 @@ const onLogin = () => {
     if (captcha.value === "") {
       return uni.showToast({ title: "请输入验证码", icon: "none" });
     }
+    getLogin2()
   }
 };
+const token = ref('')
+// 密码方式登录
+const getLogin1 = async (username, encodedPassword) => {
+  let params = { username: username, password: encodedPassword, isPassword: 1 };
+  const userStore = useUserStore()
+  const res = await login1(params)
+  if (res.data.code) {
+    token.value = res.data.result.token
+    userStore.setToken(res.data.result.token)// 保存 token
+    uni.redirectTo({
+      url: '/pages/index/index' // 确保路径是正确的
+    });
+    uni.showToast({ title: res.data.message, icon: "none" });
+  } else {
+    //显示错误信息
+    uni.showToast({ title: res.data.message, icon: "none" });
+  }
+}
+// 验证码方式登录
+const getLogin2 = () => {
 
+}
 // 注册页面跳转
 const reg = () => {
   uni.showToast({ title: "注册跳转,暂未开发联系开发人员", icon: "none" });
