@@ -1,5 +1,5 @@
 <template>
-  <view style="height: 100vh; background: #fff">
+  <view style="height:100vh;overflow: hidden; background: #fff">
     <view class="img-a">
       <view class="txt">
         您好，
@@ -148,15 +148,26 @@ const validateMobile = (mobile) => {
   }
   return true;
 };
+// #ifdef IOS
+document.body.addEventListener('focusin', () => {
+  // 软键盘弹出时，禁用页面滚动
+  document.body.style.overflow = 'hidden';
+});
+
+document.body.addEventListener('focusout', () => {
+  // 软键盘收起时，恢复页面滚动
+  document.body.style.overflow = '';
+});
+// #endif
 
 // 定义点击获取验证码的方法
-const getCode =async () => {
+const getCode = async () => {
   try {
     if (validateMobile(mobile.value)) {
       startCountdown();
       let params = { mobile: mobile.value, smsmode: "0", messageSource: "2" };
       console.log(params, 'params');
-   await sendCode(params);
+      await sendCode(params);
     }
   } catch (error) {
     //显示错误信息
@@ -184,7 +195,7 @@ const onLogin = () => {
     if (captcha.value === "") {
       return uni.showToast({ title: "请输入验证码", icon: "none" });
     }
-    getLogin2()
+    getLogin2(mobile.value, captcha.value)
   }
 };
 const token = ref('')
@@ -195,19 +206,36 @@ const getLogin1 = async (username, encodedPassword) => {
   const res = await login1(params)
   if (res.data.code) {
     token.value = res.data.result.token
-    userStore.setToken(res.data.result.token)// 保存 token
-    uni.redirectTo({
-      url: '/pages/index/index' // 确保路径是正确的
-    });
     uni.showToast({ title: res.data.message, icon: "none" });
+    userStore.setToken(res.data.result.token)// 保存 token
+    setTimeout(() => {
+      uni.redirectTo({
+        url: '/pages/index/index' // 确保路径是正确的
+      });
+    }, 1500);
   } else {
     //显示错误信息
     uni.showToast({ title: res.data.message, icon: "none" });
   }
 }
 // 验证码方式登录
-const getLogin2 = () => {
-
+const getLogin2 = async (mobile, captcha) => {
+  let params = { mobile: mobile, captcha: captcha };
+  const userStore = useUserStore()
+  const res = await login1(params)
+  if (res.data.code) {
+    token.value = res.data.result.token
+    userStore.setToken(res.data.result.token)// 保存 token
+    uni.showToast({ title: res.data.message, icon: "none" });
+    setTimeout(() => {
+      uni.redirectTo({
+        url: '/pages/index/index' // 确保路径是正确的
+      });
+    }, 1500);
+  } else {
+    //显示错误信息
+    uni.showToast({ title: res.data.message, icon: "none" });
+  }
 }
 // 注册页面跳转
 const reg = () => {

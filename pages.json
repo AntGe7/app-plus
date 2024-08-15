@@ -7,7 +7,8 @@
 				// #ifdef APP-PLUS
 				"app-plus": {
 				  "titleNView": false  ,// 禁用原生导航栏
-				    "bounce": "none" // 在 App 上禁止页面弹性滑动
+				    "bounce": "none" ,// 在 App 上禁止页面弹性滑动
+					"softinputMode": "adjustResize" // 设置软键盘弹出时调整页面大小
 				},
 				// #endif
 				 // #ifdef MP-WEIXIN
